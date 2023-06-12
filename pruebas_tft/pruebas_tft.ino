@@ -6,7 +6,7 @@
 TFT_eSPI tft = TFT_eSPI();
 int a=96;
 
-typedef struct alarma{//definicion de la estructura para las alarmas
+typedef struct {//definicion de la estructura para las alarmas
   DateTime HoraInicio;
   uint8_t DuracionDias;
   int8_t Pastilla;
