@@ -6,6 +6,10 @@
 TFT_eSPI tft = TFT_eSPI();
 int a=96;
 
+typedef enum{PASTILLA_1, PASTILLA_2, PASTILLA_3, PASTILLA_4};
+
+typedef enum{HORA,DURACION,INTERVALO,PASTILLA,CONFIRMADO,ATRAS};
+
 typedef struct {//definicion de la estructura para las alarmas
   DateTime HoraInicio;
   uint8_t DuracionDias;
@@ -250,7 +254,6 @@ void tecladoNumerico(){
 }
 
 int checkList(){
- typedef enum{HORA,DURACION,INTERVALO,PASTILLA,CONFIRMADO,ATRAS};
  TFT_eSPI_Button boton[5];
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
@@ -306,6 +309,7 @@ int checkList(){
         switch(botonActual){
           case HORA:
           boton[botonActual].drawButtonRectangular(true);
+          //delay con timer2 para que la pantalla dibuje el boton
           return HORA;
           break;
 
@@ -366,7 +370,6 @@ TFT_eSPI_Button boton[4];
 }
 
 void selectorPastillas(){
- typedef enum{PASTILLA_1, PASTILLA_2, PASTILLA_3, PASTILLA_4};
  TFT_eSPI_Button boton[4];
  char letras[4][30] = {"PAST 1", "PAST 2", "PAST 3", "PAST 4"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
  tft.fillScreen(TFT_BLACK);//color del fondo
