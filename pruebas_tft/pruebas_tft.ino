@@ -1,10 +1,21 @@
-#include "FS.h"
+//#include "FS.h"
 #include "Imagenes.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>     
-
+#include "RTClib.h"
 TFT_eSPI tft = TFT_eSPI();
 int a=96;
+
+typedef struct alarma{//definicion de la estructura para las alarmas
+  DateTime HoraInicio;
+  uint8_t DuracionDias;
+  int8_t Pastilla;
+  int8_t Intervalo;
+  uint8_t CantidadPastillas;//sera el resultado de la division de la cantidad de dias entre las horas del intervalo
+  bool Activa=false;//cuando la alarma cumpla su ciclo se desactivara
+}AlarmaVar;
+
+AlarmaVar Alarma1,Alarma2,Alarma3,Alarma4;
 
 /*void touch_calibrate(){
  
@@ -99,6 +110,7 @@ void dibujarRenglon(bool dosPuntos=false){
     tft.drawString(":",113,65);
   }*/
   img.deleteSprite();
+  }
 }
 
 void dibujarTick(int fila){
