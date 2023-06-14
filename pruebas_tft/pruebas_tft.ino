@@ -7,8 +7,8 @@ TFT_eSPI tft = TFT_eSPI();
 int a=96;
 
 typedef enum{PASTILLA_1, PASTILLA_2, PASTILLA_3, PASTILLA_4};
-
-typedef enum{HORA,DURACION,INTERVALO,PASTILLA,CONFIRMADO,ATRAS};
+typedef enum{ALARMA,PROGRAMADA,EXISTENTES,CONFIGURACION};
+typedef enum{ATRAS,CONFIRMADO,HORA,DURACION,INTERVALO,PASTILLA};// EL BOTON 1 EN TODAS LAS FUNCIONES VA A SER EL CONFIRMADO(BOTON REFIRIENDOSE A LA FUNCION TFT_eSPI_Button)
 
 typedef struct {//definicion de la estructura para las alarmas
   DateTime HoraInicio;
@@ -19,7 +19,9 @@ typedef struct {//definicion de la estructura para las alarmas
   bool Activa=false;//cuando la alarma cumpla su ciclo se desactivara
 }AlarmaVar;
 
-AlarmaVar Alarma1,Alarma2,Alarma3,Alarma4;
+AlarmaVar Alarma1,Alarma2,Alarma3,Alarma4, AlarmaTest;
+
+//DateTime aver = {6,2,0};
 
 /*void touch_calibrate(){
  
@@ -128,7 +130,7 @@ void dibujarTick(int fila){
 }
 
 
-void tecladoSemanal(){
+uint8_t tecladoSemanal(){
  TFT_eSPI_Button boton[8];
  char letras[8][6] = {"L","M","X","J","V","S","D","ENTER"};//texto de los botones
  tft.fillScreen(TFT_BLACK);//color del fondo
@@ -136,7 +138,7 @@ void tecladoSemanal(){
  tft.setTextSize(2);
  botonAtras();//el boton para retroceder
  tft.drawString("Seleccione los dias",5,40);
- int cord_x=36, cord_y=36, ancho_alto=65, separacion_x=36, separacion_y=5;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
+ uint8_t cord_x=36, cord_y=36, ancho_alto=65, separacion_x=36, separacion_y=5;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
  unsigned short int x=0,y=0,posicion;
  boolean presionado=false, apretoEnter=false;
   for(int fila=0; fila<3; fila++){//estos for anidados dibujan el teclado
@@ -184,7 +186,8 @@ void tecladoSemanal(){
   tft.drawString("siguiente",0,0);
 }
 
-void tecladoNumerico(){
+uint8_t tecladoTiempo(AlarmaVar* ptr){
+ ptr->HoraInicio;
  TFT_eSPI_Button boton[12];
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
@@ -253,28 +256,28 @@ void tecladoNumerico(){
     tft.drawString("siguiente",0,0);
 }
 
-int checkList(){
+uint8_t checkList(){
  TFT_eSPI_Button boton[5];
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
  tft.setTextSize(2);
  tft.drawString("Complete los campos",6,40);
  botonAtras();//mide 40x25px y esta en 0,0
- char letras[5][26] = {"Hora de inicio","Duracion","Intervalo","Pastilla","CONFIRMAR"};//texto de los botones
- int cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
+ char letras[5][26] = {"Hora de inicio","CONFIRMAR","Duracion","Intervalo","Pastilla"};//texto de los botones
+ int cord_x=0, cord_y=70, ancho=240, alto=45;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
  unsigned short int x=500,y=500,posicion,botonActual=500;//botonActual, x e y inician en 500 para no activar el boton de atras
  boolean presionado=false, apretoEnter=false;
  
  //parte dibujo
-  for(int fila=0; fila<5; fila++){//estos for anidados dibujan el teclado
+  for(int fila=0; fila<5; fila++){//este for dibuja el menu
 
      posicion=fila;
-     boton[posicion].initButtonUL(&tft, 0, 70 + fila * (45),240, 45,TFT_WHITE, TFT_BLUE, TFT_WHITE,letras[posicion], 2);//esta funcion dibuja los botones desde las esquina superior izq
+     boton[posicion].initButtonUL(&tft, cord_x, cord_y + fila * (alto),ancho, alto,TFT_WHITE, TFT_BLUE, TFT_WHITE,letras[posicion], 2);//esta funcion dibuja los botones desde las esquina superior izq
      //boton[posicion].initButton(&tft, posciion en X ,posicion en Y, ANCHO ,ALTO , color borde,color relleño, color texto,texto, tamaño fuente del texto);
        
        boton[posicion].drawButtonRectangular(false,false);//funcion personalizada que dibuja botones rectangulares, se le envia false para boton normal y true para invertido. 
                                                                            //aparte se le manda el string que puede ser de mas de 9 caracteres el ultimo parametro es si dibuja el texto en el centro o desde la izq      
-        if(posicion==4){
+        if(posicion==1){
           boton[posicion].initButtonUL(&tft, 0, 250,240, 70,TFT_WHITE, TFT_RED, TFT_WHITE,letras[posicion], 3);//si es el boton de enter letra mas grande y color rojo.
           boton[posicion].drawButtonRectangular(false,true);  // y el texto en el centro                          
         }
@@ -301,10 +304,10 @@ int checkList(){
         if(x<=40 && y<=25) return ATRAS;//si se apretaron las coordenadas que contienen el boton de Atras se rompe el for
         
      
-        if(boton[CONFIRMADO].contains(x,y)){//si el se apreta el enter se rompe el for y sale del loop
+        /*if(boton[CONFIRMADO].contains(x,y)){//si el se apreta el enter se rompe el for y sale del loop
             return CONFIRMADO;
             //apretoEnter=true;
-          }
+          }*/
 
         switch(botonActual){
           case HORA:
@@ -337,8 +340,8 @@ int checkList(){
 }  
 
 
-void menuInicio(){
-TFT_eSPI_Button boton[4];
+uint8_t menuInicio(){
+ TFT_eSPI_Button boton[4];
  char letras[4][30] = {"Alarma", "Programada", "Existentes", "Config"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
@@ -369,7 +372,7 @@ TFT_eSPI_Button boton[4];
   }
 }
 
-void selectorPastillas(){
+uint8_t selectorPastillas(){
  TFT_eSPI_Button boton[4];
  char letras[4][30] = {"PAST 1", "PAST 2", "PAST 3", "PAST 4"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
  tft.fillScreen(TFT_BLACK);//color del fondo
@@ -404,10 +407,5 @@ void selectorPastillas(){
 
 
 void loop() {
-   if(a==96){
-    tft.fillScreen(TFT_GREEN);
-    dibujarRenglon();
-    a++;
-   }
-   //tft.println(a);
+  
 }
