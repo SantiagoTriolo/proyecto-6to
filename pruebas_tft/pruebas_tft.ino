@@ -6,8 +6,8 @@
 TFT_eSPI tft = TFT_eSPI();
 int a=96;
 
+typedef enum{ALARMA,PROGRAMADA,EXISTENTES,CONFIGURACION}Menu;
 typedef enum{PASTILLA_1, PASTILLA_2, PASTILLA_3, PASTILLA_4};
-typedef enum{ALARMA,PROGRAMADA,EXISTENTES,CONFIGURACION};
 typedef enum{ATRAS,CONFIRMADO,HORA,DURACION,INTERVALO,PASTILLA};// EL BOTON 1 EN TODAS LAS FUNCIONES VA A SER EL CONFIRMADO(BOTON REFIRIENDOSE A LA FUNCION TFT_eSPI_Button)
 
 typedef struct {//definicion de la estructura para las alarmas
@@ -19,7 +19,15 @@ typedef struct {//definicion de la estructura para las alarmas
   bool Activa=false;//cuando la alarma cumpla su ciclo se desactivara
 }AlarmaVar;
 
-AlarmaVar Alarma1,Alarma2,Alarma3,Alarma4, AlarmaTest;
+typedef struct {//definicion de la estructura para las alarmas
+  DateTime HoraInicio;
+  uint8_t DuracionDias;
+  int8_t Pastilla[4];
+  int8_t Intervalo;
+  bool Activa=false;//cuando la alarma cumpla su ciclo se desactivara
+}ProgramadaVar;
+
+AlarmaVar Alarma[4];
 
 //DateTime aver = {6,2,0};
 
@@ -404,8 +412,18 @@ uint8_t selectorPastillas(){
   }
 }
 
-
+void salvaPantalla(){
+  tft.fillScreen(TFT_BLACK);
+  tft.setTextSize(2);
+  tft.println("presione la pantalla");
+  tft.println("para iniciar");
+}
 
 void loop() {
   
+  /*
+  switch Menu{
+    case ALARMA:
+    
+  }*/
 }
