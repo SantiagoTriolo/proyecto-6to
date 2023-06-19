@@ -209,7 +209,7 @@
 #define TFT_MISO 19
 #define TFT_MOSI 23
 #define TFT_SCLK 18
-#define TOUCH_CS 21     // Chip select pin (T_CS) of touch screen
+#define TOUCH_CS 16     // Chip select pin (T_CS) of touch screen
 #define TFT_CS   15  // Chip select control pin
 #define TFT_DC    2  // Data Command control pin
 #define TFT_RST   4  // Reset pin (could connect to RST pin)
