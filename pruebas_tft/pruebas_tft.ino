@@ -6,7 +6,7 @@
 TFT_eSPI tft = TFT_eSPI();
 int a=96;
 
-typedef enum{ALARMA,PROGRAMADA,EXISTENTES,CONFIGURACION}Menu;
+typedef enum{ALARMA,PROGRAMADA,EXISTENTES,CONFIGURACION};
 typedef enum{PASTILLA_1, PASTILLA_2, PASTILLA_3, PASTILLA_4};
 typedef enum{ATRAS,CONFIRMADO,HORA,DURACION,INTERVALO,PASTILLA};// EL BOTON 1 EN TODAS LAS FUNCIONES VA A SER EL CONFIRMADO(BOTON REFIRIENDOSE A LA FUNCION TFT_eSPI_Button)
 
@@ -28,7 +28,9 @@ typedef struct {//definicion de la estructura para las alarmas
 }ProgramadaVar;
 
 AlarmaVar Alarma[4];
+ProgramadaVar Programadas[8];
 
+uint8_t MenuActual,PantallaActual;
 //DateTime aver = {6,2,0};
 
 /*void touch_calibrate(){
@@ -102,6 +104,7 @@ void setup() {
 void botonAtras(){
   TFT_eSprite atras = TFT_eSprite(&tft);
 
+  atras.setSwapBytes(true);
   atras.setColorDepth(8);//cantidad de color que va a tener(8 bits vamos a usar nosotros y nos funciona bien)
 //  flecha.fillSprite(TFT_TRANSPARENT);
   atras.createSprite(40,25);//creamos el sprite en memoria especificandole su tamaño(tiene que ser minimo el mismo tamaño que la imagen, sino no la mostrara entera)
@@ -113,23 +116,25 @@ void botonAtras(){
 void dibujarRenglon(bool dosPuntos=false){
   TFT_eSprite img = TFT_eSprite(&tft);
 
+  img.setSwapBytes(true);
   img.setColorDepth(8);//cantidad de color que va a tener(8 bits vamos a usar nosotros y nos funciona bien)
 //  flecha.fillSprite(TFT_TRANSPARENT);
   img.createSprite(214,40);//creamos el sprite en memoria especificandole su tamaño(tiene que ser minimo el mismo tamaño que la imagen, sino no la mostrara entera)
   img.pushImage(0,0,214,40,displayBlanco);// las coordenadas tienen que ser 0,0 porque son las coordenadas del sprite si no son 0,0 se va a dibujar desfasado(cambiarlo para probar y ver que es asi) y el tamaño de la imagen que tiene que ser el mismo que en createSprite y que imagen le vamos a estar asignado al sprite(esta funcion carga la imagen dentro del sprite)
   img.pushSprite(13,60,TFT_TRANSPARENT);//envia la imagen a la pantalla en las coordenadas que le pasemos y el color de fondo que tendra el sprite
-  if(dosPuntos){
-    /*tft.setTextSize(6);
+  /*if(dosPuntos){
+    tft.setTextSize(6);
     tft.setTextColor(TFT_RED);
     tft.drawString(":",113,65);
   }*/
   img.deleteSprite();
-  }
+  
 }
 
 void dibujarTick(int fila){
   TFT_eSprite img = TFT_eSprite(&tft);
-  
+
+  img.setSwapBytes(true);
   img.setColorDepth(8);//cantidad de color que va a tener(8 bits vamos a usar nosotros y nos funciona bien)
   img.createSprite(45,45);//creamos el sprite en memoria especificandole su tamaño(tiene que ser minimo el mismo tamaño que la imagen, sino no la mostrara entera)
   img.pushImage(0,0,45,45,tick);// las coordenadas tienen que ser 0,0 porque son las coordenadas del sprite si no son 0,0 se va a dibujar desfasado(cambiarlo para probar y ver que es asi) y el tamaño de la imagen que tiene que ser el mismo que en createSprite y que imagen le vamos a estar asignado al sprite(esta funcion carga la imagen dentro del sprite)
@@ -194,7 +199,7 @@ uint8_t tecladoSemanal(){
   tft.drawString("siguiente",0,0);
 }
 
-uint8_t tecladoTiempo(AlarmaVar* ptr){
+void tecladoTiempo(AlarmaVar* ptr){
  ptr->HoraInicio;
  TFT_eSPI_Button boton[12];
  tft.fillScreen(TFT_BLACK);//color del fondo
@@ -264,7 +269,7 @@ uint8_t tecladoTiempo(AlarmaVar* ptr){
     tft.drawString("siguiente",0,0);
 }
 
-uint8_t checkList(){
+uint8_t configAlarma(){
  TFT_eSPI_Button boton[5];
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
@@ -280,18 +285,20 @@ uint8_t checkList(){
   for(int fila=0; fila<5; fila++){//este for dibuja el menu
 
      posicion=fila;
+     if(posicion!=1){
      boton[posicion].initButtonUL(&tft, cord_x, cord_y + fila * (alto),ancho, alto,TFT_WHITE, TFT_BLUE, TFT_WHITE,letras[posicion], 2);//esta funcion dibuja los botones desde las esquina superior izq
      //boton[posicion].initButton(&tft, posciion en X ,posicion en Y, ANCHO ,ALTO , color borde,color relleño, color texto,texto, tamaño fuente del texto);
        
        boton[posicion].drawButtonRectangular(false,false);//funcion personalizada que dibuja botones rectangulares, se le envia false para boton normal y true para invertido. 
-                                                                           //aparte se le manda el string que puede ser de mas de 9 caracteres el ultimo parametro es si dibuja el texto en el centro o desde la izq      
-        if(posicion==1){
-          boton[posicion].initButtonUL(&tft, 0, 250,240, 70,TFT_WHITE, TFT_RED, TFT_WHITE,letras[posicion], 3);//si es el boton de enter letra mas grande y color rojo.
+     }                                                                    //aparte se le manda el string que puede ser de mas de 9 caracteres el ultimo parametro es si dibuja el texto en el centro o desde la izq      
+        else{//if(posicion==1){
+          boton[posicion].initButtonUL(&tft, 0, 250,240, 70,TFT_WHITE, TFT_RED, TFT_WHITE,letras[1], 3);//si es el boton de enter letra mas grande y color rojo.
           boton[posicion].drawButtonRectangular(false,true);  // y el texto en el centro                          
         }
      }
+  
   //esta es la parte touch
-   for(posicion=0; posicion <=5 && !apretoEnter; posicion++){
+   for(posicion=0; posicion <=5; posicion++){
        presionado = tft.getTouch(&x,&y);//devuelve true si se apreta la pantalla y guarda las coordenadas en los parametros que le pasamos(tienen que ser unsigned short int si o si porque sino no los toma)
        if(posicion==5)posicion=0;//para que no cuente al infinito reiniciamos posicion, asi siempre esta chequeando los botones
        ////Serial.println(posicion);
@@ -357,9 +364,9 @@ uint8_t menuInicio(){
  tft.drawString("Elija una opcion",25,39);
  botonAtras();//el boton para retroceder
  
- int cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
- unsigned short int x=0,y=0,posicion;
- boolean presionado=false, noApreto=false;
+ uint8_t cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
+ unsigned short int x=0,y=0,posicion,botonActual;
+ boolean presionado=false;
  
   for(int fila=0; fila<2; fila++){//estos for anidados dibujan el teclado
     for(int columna=0; columna<2; columna++){
@@ -378,20 +385,61 @@ uint8_t menuInicio(){
      }*/
     }  
   }
+
+  //esta es la parte touch
+   for(posicion=0; posicion <=4 ; posicion++){
+       presionado = tft.getTouch(&x,&y);//devuelve true si se apreta la pantalla y guarda las coordenadas en los parametros que le pasamos(tienen que ser unsigned short int si o si porque sino no los toma)
+       if(posicion==4)posicion=0;//para que no cuente al infinito reiniciamos posicion, asi siempre esta chequeando los botones
+       ////Serial.println(posicion);
+        if(presionado && boton[posicion].contains(x,y)){
+          botonActual=posicion;
+          boton[posicion].press(true);//le decimos al boton que su estado es presionado.sirve para dar pie a otras funciones como justpressed
+        }
+       
+        else boton[posicion].press(false);  
+
+        if(boton[posicion].justReleased()) boton[posicion].drawButton();//dibuja el boton normal despues de ser pulsado 
+
+        if(x<=40 && y<=25) return ATRAS;//si se apretaron las coordenadas que contienen el boton de Atras se rompe el for
+        
+
+        switch(botonActual){
+          case ALARMA:
+          boton[botonActual].drawButton(true);
+          //delay con timer2 para que la pantalla dibuje el boton
+          return ALARMA;
+          break;
+
+          case PROGRAMADA:
+          boton[botonActual].drawButton(true);
+          return PROGRAMADA;
+          break;
+
+          case EXISTENTES:
+          boton[botonActual].drawButton(true);
+          return EXISTENTES;
+          break;
+
+          case CONFIGURACION:
+          boton[botonActual].drawButton(true);
+          return CONFIGURACION;
+          break;
+        }
+    }
 }
 
-uint8_t selectorPastillas(){
- TFT_eSPI_Button boton[4];
- char letras[4][30] = {"PAST 1", "PAST 2", "PAST 3", "PAST 4"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
+uint8_t selector1Pastilla(){
+ TFT_eSPI_Button boton[5];
+ char letras[5][30] = {"PAST 1", "PAST 2", "PAST 3", "PAST 4"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
  tft.setTextSize(2);
- tft.drawString("Elija una pastilla",25,39);
+ tft.drawString("Elija UNA pastilla",25,39);
  botonAtras();//el boton para retroceder
  
- int cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
- unsigned short int x=0,y=0,posicion;
- boolean presionado=false, noApreto=false;
+ uint8_t cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
+ unsigned short int x=0,y=0,posicion,botonActual;
+ boolean presionado=false, apretoEnter=false;
  
   for(int fila=0; fila<2; fila++){//estos for anidados dibujan el teclado
     for(int columna=0; columna<2; columna++){
@@ -402,13 +450,50 @@ uint8_t selectorPastillas(){
      boton[posicion].initButtonUL(&tft, 20 + columna * (90+20), 90 + fila * (90 + 20),90, 90,TFT_WHITE, TFT_BLUE, TFT_WHITE, letras[posicion], 2);//esta funcion dibuja los botones desde las esquina superior izq
      //boton[posicion].initButton(&tft, posciion en X ,posicion en Y, ANCHO ,ALTO , color borde,color relleño, color texto,texto, tamaño fuente del texto);
      boton[posicion].drawButton();//esta funcion dibuja el boton con los parametros dados por la funcion anterior
-     }
-    }
-  for(posicion=0; posicion<=4;posicion++){
-    if(posicion==4)posicion=0;
-    
 
-      
+     if(posicion==1){}
+    }
+  }
+  //esta es la parte touch
+   for(posicion=0; posicion <=4 ; posicion++){
+       presionado = tft.getTouch(&x,&y);//devuelve true si se apreta la pantalla y guarda las coordenadas en los parametros que le pasamos(tienen que ser unsigned short int si o si porque sino no los toma)
+       if(posicion==4)posicion=0;//para que no cuente al infinito reiniciamos posicion, asi siempre esta chequeando los botones
+       ////Serial.println(posicion);
+        if(presionado && boton[posicion].contains(x,y)){
+          botonActual=posicion;
+          boton[posicion].press(true);//le decimos al boton que su estado es presionado.sirve para dar pie a otras funciones como justpressed
+        }
+       
+        else boton[posicion].press(false);  
+
+        //if(boton[posicion].justReleased()) boton[posicion].drawButton();dibuja el boton normal despues de ser pulsado (en esta funcion necesitamos que quede dibujado para marcar que esta pulsado por eso esta comentado)
+
+        if(x<=40 && y<=25) return ATRAS;//si se apretaron las coordenadas que contienen el boton de Atras se rompe el for
+        
+    if(apretoEnter){//para casos que solo puede devolver un estado y necesita un enter para confirmar esta es la solucion
+        switch(botonActual){
+          case PASTILLA_1:
+          boton[botonActual].drawButton(true);
+          //delay con timer2 para que la pantalla dibuje el boton
+          return PASTILLA_1;
+          break;
+
+          case PASTILLA_2:
+          boton[botonActual].drawButton(true);
+          return PASTILLA_2;
+          break;
+
+          case PASTILLA_3:
+          boton[botonActual].drawButton(true);
+          return PASTILLA_3;
+          break;
+
+          case PASTILLA_4:
+          boton[botonActual].drawButton(true);
+          return PASTILLA_4;
+          break;
+        }
+    }
   }
 }
 
@@ -420,10 +505,47 @@ void salvaPantalla(){
 }
 
 void loop() {
-  
-  /*
-  switch Menu{
-    case ALARMA:
+
+if (a==96){
+  //tft.fillScreen(TFT_GREEN);
+  configAlarma();
+  dibujarTick(4);
+  a++;
+}/*
+  switch (MenuActual){
+    default:
+    MenuActual=menuInicio();
     
+    case ALARMA:
+    switch (PantallaActual){
+        
+        default:
+        PantallaActual=configAlarma();
+        break;
+
+        case HORA:
+        tecladoTiempo(&Alarma[1]);
+        PantallaActual=DEFAULT;
+        break;
+
+        case DURACION:
+        tecladoTiempo(&Alarma[1]);
+        PantallaActual=DEFAULT;
+        break;
+
+        case INTERVALO:
+        tecladoTiempo(&Alarma[1]);
+        PantallaActual=DEFAULT;
+        break;
+
+        case PASTILLA:
+        selector1Pastilla();
+        break;
+
+        case ATRAS:
+        MenuActual= DEFAULT;
+        break;
+    }
+    break;
   }*/
 }
