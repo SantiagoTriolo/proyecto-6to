@@ -12,6 +12,7 @@ typedef enum{ATRAS,CONFIRMADO,HORA,DURACION,INTERVALO,PASTILLA};// EL BOTON 1 EN
 
 typedef struct {//definicion de la estructura para las alarmas
   DateTime HoraInicio;
+  DateTime Proxima;
   uint8_t DuracionDias;
   int8_t Pastilla;
   int8_t Intervalo;
@@ -78,7 +79,7 @@ uint8_t MenuActual,PantallaActual;
 */
 void setup() {
   tft.init();
- // //Serial.begin(9600);
+ Serial.begin(9600);
 
   // Set the rotation before we calibrate
   tft.setRotation(2);//la parte de los pines es la de arriva
@@ -152,7 +153,7 @@ uint8_t tecladoSemanal(){
  botonAtras();//el boton para retroceder
  tft.drawString("Seleccione los dias",5,40);
  uint8_t cord_x=36, cord_y=36, ancho_alto=65, separacion_x=36, separacion_y=5;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
- unsigned short int x=0,y=0,posicion;
+ unsigned short int x=500,y=500,posicion;
  boolean presionado=false, apretoEnter=false;
   for(int fila=0; fila<3; fila++){//estos for anidados dibujan el teclado
     for(int columna=0; columna<3; columna++){
@@ -276,7 +277,7 @@ uint8_t configAlarma(){
  tft.setTextSize(2);
  tft.drawString("Complete los campos",6,40);
  botonAtras();//mide 40x25px y esta en 0,0
- char letras[5][26] = {"Hora de inicio","CONFIRMAR","Duracion","Intervalo","Pastilla"};//texto de los botones
+ char letras[5][26] = {"Hora de inicio","Duracion","Intervalo","Pastilla","CONFIRMAR"};//texto de los botones
  int cord_x=0, cord_y=70, ancho=240, alto=45;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
  unsigned short int x=500,y=500,posicion,botonActual=500;//botonActual, x e y inician en 500 para no activar el boton de atras
  boolean presionado=false, apretoEnter=false;
@@ -285,17 +286,16 @@ uint8_t configAlarma(){
   for(int fila=0; fila<5; fila++){//este for dibuja el menu
 
      posicion=fila;
-     if(posicion!=1){
+     
      boton[posicion].initButtonUL(&tft, cord_x, cord_y + fila * (alto),ancho, alto,TFT_WHITE, TFT_BLUE, TFT_WHITE,letras[posicion], 2);//esta funcion dibuja los botones desde las esquina superior izq
      //boton[posicion].initButton(&tft, posciion en X ,posicion en Y, ANCHO ,ALTO , color borde,color relleño, color texto,texto, tamaño fuente del texto);
        
        boton[posicion].drawButtonRectangular(false,false);//funcion personalizada que dibuja botones rectangulares, se le envia false para boton normal y true para invertido. 
-     }                                                                    //aparte se le manda el string que puede ser de mas de 9 caracteres el ultimo parametro es si dibuja el texto en el centro o desde la izq      
-        else{//if(posicion==1){
-          boton[posicion].initButtonUL(&tft, 0, 250,240, 70,TFT_WHITE, TFT_RED, TFT_WHITE,letras[1], 3);//si es el boton de enter letra mas grande y color rojo.
+     }                                                    //aparte se le manda el string que puede ser de mas de 9 caracteres el ultimo parametro es si dibuja el texto en el centro o desde la izq      
+        if(posicion==4){
+          boton[posicion].initButtonUL(&tft, 0, 250,240, 70,TFT_WHITE, TFT_RED, TFT_WHITE,letras[posicion], 3);//si es el boton de enter letra mas grande y color rojo.
           boton[posicion].drawButtonRectangular(false,true);  // y el texto en el centro                          
         }
-     }
   
   //esta es la parte touch
    for(posicion=0; posicion <=5; posicion++){
@@ -317,7 +317,8 @@ uint8_t configAlarma(){
         if(boton[posicion].justReleased()) boton[posicion].drawButtonRectangular();//dibuja el boton normal despues de ser pulsado 
 
         if(x<=40 && y<=25) return ATRAS;//si se apretaron las coordenadas que contienen el boton de Atras se rompe el for
-        
+
+        if(boton[4].justPressed()) return CONFIRMADO;
      
         /*if(boton[CONFIRMADO].contains(x,y)){//si el se apreta el enter se rompe el for y sale del loop
             return CONFIRMADO;
@@ -346,10 +347,6 @@ uint8_t configAlarma(){
           return PASTILLA;
           break;
 
-          case CONFIRMADO:
-          boton[botonActual].drawButtonRectangular(true);
-          return CONFIRMADO;
-          break;
         }
     }
 }  
@@ -365,7 +362,7 @@ uint8_t menuInicio(){
  botonAtras();//el boton para retroceder
  
  uint8_t cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
- unsigned short int x=0,y=0,posicion,botonActual;
+ unsigned short int x=500,y=500,posicion,botonActual=155;//x e y en 500 para no gatillar el atras
  boolean presionado=false;
  
   for(int fila=0; fila<2; fila++){//estos for anidados dibujan el teclado
@@ -407,21 +404,24 @@ uint8_t menuInicio(){
           case ALARMA:
           boton[botonActual].drawButton(true);
           //delay con timer2 para que la pantalla dibuje el boton
+          Serial.println("ALARMA");
           return ALARMA;
           break;
 
           case PROGRAMADA:
           boton[botonActual].drawButton(true);
+          Serial.println("PORRO");
           return PROGRAMADA;
           break;
 
           case EXISTENTES:
           boton[botonActual].drawButton(true);
+          Serial.println("EX");
           return EXISTENTES;
           break;
 
           case CONFIGURACION:
-          boton[botonActual].drawButton(true);
+          boton[botonActual].drawButton(true);Serial.println("con");
           return CONFIGURACION;
           break;
         }
@@ -430,7 +430,7 @@ uint8_t menuInicio(){
 
 uint8_t selector1Pastilla(){
  TFT_eSPI_Button boton[5];
- char letras[5][30] = {"PAST 1", "PAST 2", "PAST 3", "PAST 4"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
+ char letras[5][30] = {"ENTER","PAST 1", "PAST 2", "PAST 3", "PAST 4"};//texto de los botones. problema parece que la funcuion para los botones solo acepta texto de 9 caracteres
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
  tft.setTextSize(2);
@@ -506,21 +506,25 @@ void salvaPantalla(){
 
 void loop() {
 
-if (a==96){
+/*if (a==96){
   //tft.fillScreen(TFT_GREEN);
-  configAlarma();
+  tecladoSemanal ();
   dibujarTick(4);
   a++;
-}/*
+}/**/
   switch (MenuActual){
     default:
     MenuActual=menuInicio();
+    Serial.println(MenuActual);
+    break;
+    
     
     case ALARMA:
     switch (PantallaActual){
         
         default:
-        PantallaActual=configAlarma();
+        configAlarma();
+        Serial.println("898989");
         break;
 
         case HORA:
@@ -547,5 +551,6 @@ if (a==96){
         break;
     }
     break;
-  }*/
+  }
+  //menuInicio();
 }
