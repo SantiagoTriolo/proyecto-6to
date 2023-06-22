@@ -31,7 +31,7 @@ typedef struct {//definicion de la estructura para las alarmas
 AlarmaVar Alarma[4];
 ProgramadaVar Programadas[8];
 
-uint8_t MenuActual,PantallaActual;
+uint8_t MenuActual=90,PantallaActual=90;//los igualamos a valores inalcanzables para que no arranquen activando nada
 //DateTime aver = {6,2,0};
 
 /*void touch_calibrate(){
@@ -145,7 +145,7 @@ void dibujarTick(int fila){
 
 
 uint8_t tecladoSemanal(){
- TFT_eSPI_Button boton[8];
+ TFT_eSPI_Button boton[8];                                    
  char letras[8][6] = {"L","M","X","J","V","S","D","ENTER"};//texto de los botones
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
@@ -275,7 +275,8 @@ uint8_t configAlarma(){
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
  tft.setTextSize(2);
- tft.drawString("Complete los campos",6,40);
+ tft.setTextColor(TFT_WHITE,TFT_TRANSPARENT);
+ tft.drawString("COMPLETE LOS CAMPOS",6,40);
  botonAtras();//mide 40x25px y esta en 0,0
  char letras[5][26] = {"Hora de inicio","Duracion","Intervalo","Pastilla","CONFIRMAR"};//texto de los botones
  int cord_x=0, cord_y=70, ancho=240, alto=45;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
@@ -515,15 +516,17 @@ void loop() {
   switch (MenuActual){
     default:
     MenuActual=menuInicio();
+    //configAlarma();
     Serial.println(MenuActual);
     break;
     
     
     case ALARMA:
+    Serial.println("SEXO");
     switch (PantallaActual){
         
         default:
-        configAlarma();
+        PantallaActual=configAlarma();
         Serial.println("898989");
         break;
 
@@ -547,10 +550,9 @@ void loop() {
         break;
 
         case ATRAS:
-        MenuActual= DEFAULT;
+        MenuActual=DEFAULT;
         break;
     }
     break;
   }
-  //menuInicio();
 }
