@@ -6,12 +6,13 @@
 TFT_eSPI tft = TFT_eSPI();
 int a=96;
 
+#define Default 90
+
 typedef enum{ALARMA,PROGRAMADA,EXISTENTES,CONFIGURACION};
 typedef enum{PASTILLA_1, PASTILLA_2, PASTILLA_3, PASTILLA_4};
-typedef enum{ATRAS,CONFIRMADO,HORA,DURACION,INTERVALO,PASTILLA};// EL BOTON 1 EN TODAS LAS FUNCIONES VA A SER EL CONFIRMADO(BOTON REFIRIENDOSE A LA FUNCION TFT_eSPI_Button)
+typedef enum{HORA,DURACION,INTERVALO,PASTILLA,ATRAS,CONFIRMADO,};//
 
 typedef struct {//definicion de la estructura para las alarmas
-  DateTime HoraInicio;
   DateTime Proxima;
   uint8_t DuracionDias;
   int8_t Pastilla;
@@ -123,11 +124,11 @@ void dibujarRenglon(bool dosPuntos=false){
   img.createSprite(214,40);//creamos el sprite en memoria especificandole su tamaño(tiene que ser minimo el mismo tamaño que la imagen, sino no la mostrara entera)
   img.pushImage(0,0,214,40,displayBlanco);// las coordenadas tienen que ser 0,0 porque son las coordenadas del sprite si no son 0,0 se va a dibujar desfasado(cambiarlo para probar y ver que es asi) y el tamaño de la imagen que tiene que ser el mismo que en createSprite y que imagen le vamos a estar asignado al sprite(esta funcion carga la imagen dentro del sprite)
   img.pushSprite(13,60,TFT_TRANSPARENT);//envia la imagen a la pantalla en las coordenadas que le pasemos y el color de fondo que tendra el sprite
-  /*if(dosPuntos){
+  if(dosPuntos){
     tft.setTextSize(6);
     tft.setTextColor(TFT_RED);
-    tft.drawString(":",113,65);
-  }*/
+    tft.drawString(":",105,58);
+  }
   img.deleteSprite();
   
 }
@@ -201,7 +202,7 @@ uint8_t tecladoSemanal(){
 }
 
 void tecladoTiempo(AlarmaVar* ptr){
- ptr->HoraInicio;
+ ptr->Proxima;
  TFT_eSPI_Button boton[12];
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
@@ -209,7 +210,7 @@ void tecladoTiempo(AlarmaVar* ptr){
  tft.drawString("Seleccione la hora",13,39);
  //tft.setTextSize(6);
  //tft.drawString(":",103,60);
- dibujarRenglon();//mide 214x40px y esta en 13,60
+ dibujarRenglon(true);//mide 214x40px y esta en 13,60
  botonAtras();//mide 40x25px y esta en 0,0
 // tft.pushImage(0,0,40,25,FLECHA_IMG);
  char letras[12][6] = {"1","2","3","4","5","6","7","8","9","CLR","0","ENTER"};//texto de los botones
@@ -359,6 +360,7 @@ uint8_t menuInicio(){
  tft.fillScreen(TFT_BLACK);//color del fondo
  //tft.setTextFont(1); sino se especifica usa la predeterminada
  tft.setTextSize(2);
+ tft.setTextColor(TFT_WHITE,TFT_TRANSjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuPARENT);
  tft.drawString("Elija una opcion",25,39);
  botonAtras();//el boton para retroceder
  
@@ -508,11 +510,10 @@ void salvaPantalla(){
 void loop() {
 
 /*if (a==96){
-  //tft.fillScreen(TFT_GREEN);
-  tecladoSemanal ();
-  dibujarTick(4);
+  tft.fillScreen(TFT_GREEN);
+  dibujarRenglon(true);
   a++;
-}/**/
+}*/
   switch (MenuActual){
     default:
     MenuActual=menuInicio();
@@ -523,6 +524,7 @@ void loop() {
     
     case ALARMA:
     Serial.println("SEXO");
+    Serial.println(PantallaActual);
     switch (PantallaActual){
         
         default:
@@ -532,25 +534,27 @@ void loop() {
 
         case HORA:
         tecladoTiempo(&Alarma[1]);
-        PantallaActual=DEFAULT;
+        PantallaActual=Default;
         break;
 
         case DURACION:
         tecladoTiempo(&Alarma[1]);
-        PantallaActual=DEFAULT;
+        PantallaActual=Default;
         break;
 
         case INTERVALO:
         tecladoTiempo(&Alarma[1]);
-        PantallaActual=DEFAULT;
+        PantallaActual=Default;
         break;
 
         case PASTILLA:
-        selector1Pastilla();
+        tecladoTiempo(&Alarma[1]);
+        PantallaActual=Default;//la mandamos a 90 para que caiga en default
         break;
 
         case ATRAS:
-        MenuActual=DEFAULT;
+        PantallaActual=Default;
+        MenuActual=Default;
         break;
     }
     break;
