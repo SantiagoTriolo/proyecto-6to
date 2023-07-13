@@ -143,6 +143,17 @@ void dibujarTick(int fila){
   img.deleteSprite();
 }
 
+void dibujarCalendario(){
+  TFT_eSprite img = TFT_eSprite(&tft);
+
+  img.setSwapBytes(true);
+  img.setColorDepth(8);//cantidad de color que va a tener(8 bits vamos a usar nosotros y nos funciona bien)
+  img.createSprite(90,90);//creamos el sprite en memoria especificandole su tamaño(tiene que ser minimo el mismo tamaño que la imagen, sino no la mostrara entera)
+  img.pushImage(0,0,90,90,calendario);// las coordenadas tienen que ser 0,0 porque son las coordenadas del sprite si no son 0,0 se va a dibujar desfasado(cambiarlo para probar y ver que es asi) y el tamaño de la imagen que tiene que ser el mismo que en createSprite y que imagen le vamos a estar asignado al sprite(esta funcion carga la imagen dentro del sprite)
+  img.pushSprite(0,0,TFT_TRANSPARENT);//envia la imagen a la pantalla en las coordenadas que le pasemos y el color de fondo que tendra el sprite
+  img.deleteSprite();
+}
+
 uint8_t tecladoSemanal(){
  TFT_eSPI_Button boton[8];                                    
  char letras[8][6] = {"L","M","X","J","V","S","D","ENTER"};//texto de los botones
@@ -579,12 +590,10 @@ void salvaPantalla(){
 
 void loop() {
 
-/*if (a==96){
-  tft.fillScreen(TFT_GREEN);
-  Serial.println("a");
-  selector1Pastilla();
+if (a==96){
+  dibujarCalendario();
   a++;
-}*/
+}/*
   switch (MenuActual){
     default:
     MenuActual=menuInicio();
@@ -629,5 +638,5 @@ void loop() {
         break;
     }
     break;
-  }
+  }*/
 }
