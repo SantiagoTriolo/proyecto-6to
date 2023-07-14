@@ -294,7 +294,7 @@ void tecladoNumerico(AlarmaVar actual){
  botonAtras();//mide 40x25px y esta en 0,0
  char letras[12][6] = {"1","2","3","4","5","6","7","8","9","CLR","0","ENTER"};//texto de los botones
  int cord_x=13, cord_y=100, ancho=62, alto=45, separacion_x=13, separacion_y=20;//una vez hallamos decidido bien estos parametros usamos las variables en la funcion init directamente para mas comodidad y prolijidad
- unsigned short int x=500,y=500,posicion,digito=0;
+ uint16_t x=500,y=500,posicion,digito=0,hora[4];
  boolean presionado=false, apretoEnter=false;
  
  //parte dibujo
@@ -306,10 +306,10 @@ void tecladoNumerico(AlarmaVar actual){
                                      
      boton[posicion].initButtonUL(&tft, 13 + columna * (62+13), 112 + fila * (45 + 6),62, 45,TFT_WHITE, TFT_BLUE, TFT_WHITE,letras[posicion], 3);//esta funcion dibuja los botones desde las esquina superior izq
      //boton[posicion].initButton(&tft, posciion en X ,posicion en Y, ANCHO ,ALTO , color borde,color relleño, color texto,texto, tamaño fuente del texto);
-        if(posicion==11){
+        if(posicion==11){//boton enter
           boton[posicion].initButtonUL(&tft, 13 + columna * (62+13), 112 + fila * (45 + 6),62, 45,TFT_WHITE, TFT_RED, TFT_WHITE,letras[posicion], 2);//si es el boton de enter letra mas chica y color rojo.                            
         }
-         if(posicion==9){
+         if(posicion==9){//boton clear
           boton[posicion].initButtonUL(&tft, 13 + columna * (62+13), 112 + fila * (45 + 6),62, 45,TFT_WHITE, TFT_RED, TFT_WHITE,letras[posicion], 3);//si es el boton de enter letra mas chica y color rojo.                            
         }
      boton[posicion].drawButton();//esta funcion dibuja el boton con los parametros dados por la funcion anterior
@@ -330,6 +330,7 @@ void tecladoNumerico(AlarmaVar actual){
           tft.setTextSize(4);
           tft.setTextColor(TFT_RED);
           tft.drawString(letras[posicion],70 +(digito *27),65);
+          hora[digito]= 
           digito++;
          }
          if(boton[9].justPressed()){//si se apreto el CLEAR(boton 9) que se reinicie digito y se redibuje el Renglon 
